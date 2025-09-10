@@ -2,11 +2,21 @@
 # Smart kernel config updater that only enforces system-specific requirements
 # Uses checkVM.sh to detect what's actually needed
 
-CONFIG_FILE=".config"
-BACKUP_FILE=".config.backup"
+CONFIG_FILE="linux-*/\.config"
+BACKUP_FILE="linux-*/\.config.backup"
+
+# Find the linux-* directory and .config file
+LINUX_DIR=$(find . -maxdepth 1 -type d -name "linux-*" | head -1)
+if [ -z "$LINUX_DIR" ]; then
+    echo "ERROR: No linux-* directory found."
+    exit 1
+fi
+
+CONFIG_FILE="$LINUX_DIR/.config"
+BACKUP_FILE="$LINUX_DIR/.config.backup"
 
 if [ ! -f "$CONFIG_FILE" ]; then
-    echo "ERROR: $CONFIG_FILE not found in current directory."
+    echo "ERROR: $CONFIG_FILE not found."
     exit 1
 fi
 
@@ -63,7 +73,7 @@ fi
 
 echo
 echo "Running 'make olddefconfig' to resolve dependencies..."
-if make olddefconfig; then
+if (cd "$LINUX_DIR" && make olddefconfig); then
     echo "Dependencies resolved successfully."
 else
     echo "ERROR: make olddefconfig failed. Restoring backup."
