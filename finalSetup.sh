@@ -1,6 +1,16 @@
+#!/bin/bash
 set -e
 
 KERNEL_VER="$1"
+
+# Find the linux-* directory
+LINUX_DIR=$(find . -maxdepth 1 -type d -name "linux-*" | head -1)
+if [ -z "$LINUX_DIR" ]; then
+    echo "ERROR: No linux-* directory found."
+    exit 1
+fi
+
+cd "$LINUX_DIR"
 
 make -j"$(nproc)"
 
